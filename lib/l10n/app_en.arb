@@ -1,0 +1,8 @@
+{
+  "@@locale": "en",
+  "appTitle": "Chat App",
+  "loginTitle": "Login",
+  "emailHint": "Email",
+  "passwordHint": "Password",
+  "signupTitle": "Sign Up"
+}

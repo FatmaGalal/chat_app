@@ -1,0 +1,40 @@
+type User @table {
+  username: String!
+  email: String!
+  passwordHash: String!
+  createdAt: Timestamp!
+  displayName: String
+  profilePictureUrl: String
+  lastOnlineAt: Timestamp
+  status: String
+}
+
+type Conversation @table {
+  type: String!
+  createdAt: Timestamp!
+  name: String
+  lastMessageAt: Timestamp
+}
+
+type Message @table {
+  content: String!
+  createdAt: Timestamp!
+  sender: User
+  conversation: Conversation
+  imageUrl: String
+}
+
+type Participant @table(key: ["user", "conversation"]) {
+  user: User!
+  conversation: Conversation!
+  joinedAt: Timestamp!
+  role: String
+  lastSeenMessageId: UUID
+}
+
+type Contact @table(key: ["userA", "userB"]) {
+  userA: User!
+  userB: User!
+  status: String!
+  createdAt: Timestamp!
+}

@@ -1,0 +1,8 @@
+{
+  "@@locale": "ar",
+  "appTitle": "دردشة",
+  "loginTitle": "تسجيل الدخول",
+  "emailHint": "البريد الإلكتروني",
+  "passwordHint": "كلمة المرور",
+  "signupTitle": "إنشاء حساب"
+}
