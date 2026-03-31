@@ -1,97 +1,95 @@
 import 'package:chat_app/constants.dart';
-import 'package:chat_app/models/message.dart';
+import 'package:chat_app/cubits/chat_cubit/chat_cubit.dart';
 import 'package:chat_app/widgets/chat_bubble.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-
-class ChatPage extends StatelessWidget{
-
-  static String id='Chat Page';
-  CollectionReference message = FirebaseFirestore.instance.collection(kMessageCollection);
-  TextEditingController controller =  TextEditingController();
-  final scrollController =ScrollController();
-
+class ChatPage extends StatelessWidget {
   ChatPage({super.key});
+  static String id = 'Chat Page';
+
+  final TextEditingController controller = TextEditingController();
+  final ScrollController scrollController = ScrollController();
+
   @override
   Widget build(BuildContext context) {
-    var mediaRout=ModalRoute.of(context)!.settings.arguments ;
-    String email='';
-    if(mediaRout!=null)
-    {email =mediaRout as String;} 
-    return StreamBuilder<QuerySnapshot>(
-      stream: message.orderBy(kCreatedAt).snapshots(),
-       builder: (context,snapshot)
-    {
- 
-    if (snapshot.hasData) {
-      List<Message> messageList=[];
+    var mediaRout = ModalRoute.of(context)!.settings.arguments;
+    final email =
+        mediaRout as String? ?? FirebaseAuth.instance.currentUser?.email ?? '';
 
-      for (int i=0;i<snapshot.data!.docs.length; i++)
-      {
-        messageList.add(Message.fromJson(snapshot.data!.docs[i]));
-      }
+    context.read<ChatCubit>().getChatMessages();
 
-   
-  return Scaffold(
-  
-  appBar: AppBar(
-  automaticallyImplyLeading: false,
-  backgroundColor: kPrimaryColor,
-  title: Row(
-  mainAxisAlignment: MainAxisAlignment.center,
-  children: [ 
-  Image.asset(kLogo, height: 50,),
-   Text('Scholar Chat', style: TextStyle(color: Colors.white, fontFamily: kTitleFont, fontSize: 16),),
-    ]),
-  ),
-  body: Column(
-    children:[ 
-  Expanded(
-  child: ListView.builder(
-    controller: scrollController,
-    itemCount: messageList.length,
-    itemBuilder:(context, index)
-  {
-    
-    return messageList[index].id.toLowerCase() == email.toLowerCase()? ChatBubble(message: messageList[index]): ChatBubbleFriend(message: messageList[index]);
-  }),
-    ),
-  Padding(
-    padding: EdgeInsetsGeometry.fromLTRB(16,16,16,32),
-    child: TextField(
-      controller: controller,
-      onSubmitted: (data){
-        message.add(
-          {
-            kMessage:data,
-            kCreatedAt:DateTime.now(),
-            kId:email,
-          }
+    return BlocConsumer<ChatCubit, ChatState>(
+      listener: (context, state) {},
+      builder: (context, state) {
+        final messageList = BlocProvider.of<ChatCubit>(
+          context,
+        ).getChatMessages();
+
+        return Scaffold(
+          appBar: AppBar(
+            automaticallyImplyLeading: false,
+            backgroundColor: kPrimaryColor,
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset(kLogo, height: 50),
+                Text(
+                  'Scholar Chat',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontFamily: kTitleFont,
+                    fontSize: 16,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          body: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Expanded(
+                child: ListView.builder(
+                  controller: scrollController,
+                  //reverse: true,
+                  itemCount: messageList.length,
+                  itemBuilder: (context, index) {
+                    return messageList[index].id.toLowerCase() ==
+                            email.toLowerCase()
+                        ? ChatBubble(message: messageList[index])
+                        : ChatBubbleFriend(message: messageList[index]);
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsetsGeometry.fromLTRB(16, 16, 16, 32),
+                child: TextField(
+                  controller: controller,
+                  onSubmitted: (data) async {
+                    if (data.trim().isEmpty) {
+                      return;
+                    }
+
+                    await BlocProvider.of<ChatCubit>(
+                      context,
+                    ).sendMessage(message: data.trim(), id: email);
+                    controller.clear();
+                  },
+                  decoration: InputDecoration(
+                    hintText: 'Send Message',
+                    suffixIcon: Icon(Icons.send, color: kPrimaryColor),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(color: kPrimaryColor),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         );
-        controller.clear();
-        scrollController.animateTo(scrollController.position.maxScrollExtent, duration: Duration(microseconds: 500), curve: Curves.easeIn);
       },
-      decoration: InputDecoration(
-        hintText: 'Send Message',
-        suffixIcon: Icon(Icons.send,
-        color: kPrimaryColor,),
-        border: OutlineInputBorder(
-          
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: kPrimaryColor,  ),
-          
-        )
-      ),
-    ),
-  ),
-  ]),
-  
-  );
-}else
-{
-return Container();
-}
-    });
-}
+    );
+  }
 }
