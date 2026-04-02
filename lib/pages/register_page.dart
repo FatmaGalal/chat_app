@@ -1,11 +1,10 @@
+import 'package:chat_app/blocs/register_bloc/register_bloc.dart';
 import 'package:chat_app/constants.dart';
-import 'package:chat_app/cubits/register_cubit/register_cubit.dart';
 import 'package:chat_app/helpers/show_snak_bar_helper.dart';
 import 'package:chat_app/pages/chat_page.dart';
 import 'package:chat_app/utils/assets_data.dart';
 import 'package:chat_app/widgets/custom_button.dart';
 import 'package:chat_app/widgets/custom_textfield.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
@@ -24,7 +23,7 @@ class RegisterPage extends StatelessWidget {
 
     GlobalKey<FormState> formKey = GlobalKey();
 
-    return BlocConsumer<RegisterCubit, RegisterState>(
+    return BlocConsumer<RegisterBloc, RegisterState>(
       listener: (context, state) {
         if (state is RegisterLoading) {
           isLoading = true;
@@ -99,9 +98,12 @@ class RegisterPage extends StatelessWidget {
                       buttonText: 'Create an account',
                       onTab: () async {
                         if (formKey.currentState!.validate()) {
-                          BlocProvider.of<RegisterCubit>(
-                            context,
-                          ).registerUser(email: email!, password: password!);
+                          BlocProvider.of<RegisterBloc>(context).add(
+                            RegisterSubmittedEvent(
+                              email: email!,
+                              password: password!,
+                            ),
+                          );
                         } else {}
                       },
                     ),
