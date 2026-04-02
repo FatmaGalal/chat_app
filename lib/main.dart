@@ -1,6 +1,6 @@
-import 'package:chat_app/cubits/chat_cubit/chat_cubit.dart';
-import 'package:chat_app/cubits/login_cubit/login_cubit.dart';
-import 'package:chat_app/cubits/register_cubit/register_cubit.dart';
+import 'package:chat_app/blocs/bloc/chat_bloc.dart';
+import 'package:chat_app/blocs/login_bloc/login_bloc.dart';
+import 'package:chat_app/blocs/register_bloc/register_bloc.dart';
 import 'package:chat_app/pages/chat_page.dart';
 import 'package:chat_app/pages/login_page.dart';
 import 'package:chat_app/pages/register_page.dart';
@@ -22,9 +22,9 @@ class ChatApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (_) => LoginCubit()),
-        BlocProvider(create: (_) => RegisterCubit()),
-        BlocProvider(create: (_) => ChatCubit()),
+        BlocProvider(create: (_) => LoginBloc()),
+        BlocProvider(create: (_) => RegisterBloc()),
+        BlocProvider(create: (_) => ChatBloc()..add(ChatStarted())),
       ],
       child: MaterialApp(
         routes: {
